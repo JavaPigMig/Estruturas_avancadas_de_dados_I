@@ -56,6 +56,22 @@ public class BinarySearchTree<K extends Comparable<K>, V> implements BinarySearc
 		return search(node.next(key), key);
 	}
 
+	public Node searchNode(K key) {
+		return searchNode(root, key);
+	}
+
+	private Node searchNode(Node node, K key) {
+
+		if (node == null) {
+			return null;
+		} else if (key.compareTo(node.key) == 0) {
+			return node;
+		}
+
+		return searchNode(node.next(key), key);
+
+	}
+
 	@Override
 	public void insert(K key, V value) {
 		// TODO Auto-generated method stub
@@ -214,16 +230,16 @@ public class BinarySearchTree<K extends Comparable<K>, V> implements BinarySearc
 
 	private int countNodes(Node node) {
 
-		int count = 0; 
-		
-        if (node != null) {  
-            count += 1;  
-            count += countNodes(node.right);
-            count += countNodes(node.left); 
-            }
-        
-        return count;  
-    
+		int count = 0;
+
+		if (node != null) {
+			count += 1;
+			count += countNodes(node.right);
+			count += countNodes(node.left);
+		}
+
+		return count;
+
 	}
 
 	@Override
@@ -231,23 +247,24 @@ public class BinarySearchTree<K extends Comparable<K>, V> implements BinarySearc
 		// TODO Auto-generated method stub
 		return countInternalNodes(root);
 	}
-	
+
 	private int countInternalNodes(Node node) {
-		
-		if(root == null) {return 0;}
-		
+
+		if (root == null) {
+			return 0;
+		}
+
 		int count = 0;
-		
-		if(node != null && (node.right != null || node.left != null)) {
-			if(node != root) {count += 1;}
+
+		if (node != null && (node.right != null || node.left != null)) {
+			if (node != root) {
+				count += 1;
+			}
 			count += countInternalNodes(node.left);
 			count += countInternalNodes(node.right);
 		}
-		
-		
-		
-		
-		return count ;
+
+		return count;
 	}
 
 	@Override
@@ -255,63 +272,186 @@ public class BinarySearchTree<K extends Comparable<K>, V> implements BinarySearc
 		// TODO Auto-generated method stub
 		return countLeaves(root);
 	}
-	
+
 	private int countLeaves(Node node) {
-		if(root == null) {return 0;}
-		
+		if (root == null) {
+			return 0;
+		}
+
 		int count = 0;
-	
-		if(node != null ) {
-			if(node.isLeaf()) {count += 1;}
-			
+
+		if (node != null) {
+			if (node.isLeaf()) {
+				count += 1;
+			}
+
 			count += countLeaves(node.left);
 			count += countLeaves(node.right);
 		}
-		
-		
+
 		return count;
 	}
 
 	@Override
 	public int degree(K key) {
-		// TODO Auto-generated method stub
-		return 0;
+		Node node = searchNode(key);
+
+		int degree = 0;
+
+		if (node.left != null) {
+			degree++;
+		}
+
+		if (node.right != null) {
+			degree++;
+		}
+
+		return degree;
 	}
 
 	@Override
 	public int degreeTree() {
-		// TODO Auto-generated method stub
-		return 0;
+		return degreeTree(root);
+	}
+
+	private int degreeTree(Node node) {
+
+		if (node == null) {
+			return 0;
+		}
+
+		int lDegree = node.left != null ? degree(node.left.key) : 0;
+		int rDegree = node.right != null ? degree(node.right.key) : 0;
+
+		int max = 0;
+		if (lDegree > rDegree) {
+			max = lDegree;
+		} else {
+			max = rDegree;
+		}
+
+		int lMax = degreeTree(node.left);
+		int rMax = degreeTree(node.right);
+
+		if (max > lMax && max > rMax) {
+			max = max;
+		}
+
+		else if (lMax > max && lMax > rMax) {
+			max = lMax;
+		}
+
+		else {
+			max = rMax;
+		}
+
+		int thisMax = degree(node.key);
+
+		return thisMax > max ? thisMax : max;
+
 	}
 
 	@Override
 	public int height(K key) {
-		// TODO Auto-generated method stub
-		return 0;
+		return height(searchNode(key), 0) - 1; // Começa com -1 para já descontar o proprio elemento
+	}
+
+	private int height(Node node, int h) {
+
+		if (node != null) {
+
+			int lHeight = node.left != null ? height(node.left, h) : 0;
+			int rHeight = node.right != null ? height(node.right, h) : 0;
+
+			if (lHeight > h && lHeight > rHeight) {
+				h = lHeight;
+			}
+
+			else if (rHeight > h && rHeight > lHeight) {
+				h = rHeight;
+			}
+
+			h += 1;
+
+		}
+
+		return h;
+
 	}
 
 	@Override
 	public int heightTree() {
-		// TODO Auto-generated method stub
-		return 0;
+		return height(root.key);
 	}
 
 	@Override
 	public int depth(K key) {
-		// TODO Auto-generated method stub
-		return 0;
+		return depth(root, key, 0);
+
+	}
+
+	private int depth(Node node, K key, int count) {
+
+		if (node == null) {
+			return -1;
+		} else if (key.compareTo(node.key) == 0) {
+			// return node.value;
+			return count;
+		}
+		count++;
+		return depth(node.next(key), key, count);
 	}
 
 	@Override
 	public String ancestors(K key) {
-		// TODO Auto-generated method stub
-		return null;
+
+		if (search(key) != null) {
+			return ancestors(key, root, " ") + key.toString();
+		} else {
+			return null;
+		}
 	}
 
+	private String ancestors(K key, Node node, String lista) {
+
+		if (key.compareTo(node.key) == 0) {
+			return lista;
+		}
+		lista = node.toString() + " " + lista;
+		return ancestors(key, node.next(key), lista);
+	}
+
+	// ----------------------------------------------------------
 	@Override
 	public String descendents(K key) {
-		// TODO Auto-generated method stub
-		return null;
+		Node pNode = searchNode(key);
+		if (pNode == null) {
+			return null;
+		} else {
+			String lista = pNode.toString();
+			return descendents(key, pNode, lista);
+		}
 	}
 
+	private String descendents(K key, Node node, String lista) {
+
+		if (node == null) {
+			return lista;
+		} else {
+
+			if (node.right != null) {
+				lista = lista + " " + node.right.toString();
+
+			}
+			if (node.left != null) {
+				lista = lista + " " + node.left.toString();
+
+			}
+
+			lista = descendents(key, node.right, lista);
+			lista = descendents(key, node.left, lista);
+
+			return lista;
+		}
+	}
 }
